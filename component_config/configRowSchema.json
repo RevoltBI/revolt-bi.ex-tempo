@@ -2,7 +2,7 @@
     "type": "object",
     "title": "Tempo Extractor Row Configuration",
     "required": [
-        "endpoints",
+        "endpoint",
         "destination"
     ],
     "properties": {
