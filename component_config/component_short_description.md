@@ -1,0 +1,1 @@
+Extractor for the Tempo app used in Jira to handle time logging
