@@ -1,1 +1,1 @@
-Extractor for the Tempo aspp used in Jira to handle time logging
+Extractor for the Tempo app used in Jira to handle time logging
