@@ -132,8 +132,11 @@ class TempoExtractor(ComponentBase):
 
     def extract_worklogs(self, date_from: datetime, date_to: datetime):
         worklogs = self.client.get_worklogs(dateFrom=date_from, dateTo=date_to)
-        worklogs_table = create_table(records=worklogs, table_name="worklogs", primary_key=["tempoWorklogId"])
-        worklogs_table.save_as_csv_with_manifest(self, incremental=self.incremental, include_csv_header=self.debug)
+        if isinstance(worklogs, list):
+            worklogs_table = create_table(records=worklogs, table_name="worklogs", primary_key=["tempoWorklogId"])
+            worklogs_table.save_as_csv_with_manifest(self, incremental=self.incremental, include_csv_header=self.debug)
+        else:
+            raise UserException(f"API call returned unexpected response: {worklogs}")
 
 
 """
