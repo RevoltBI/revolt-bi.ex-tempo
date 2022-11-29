@@ -109,3 +109,17 @@ then
 else
     echo "loggerConfiguration is empty!"
 fi
+
+echo "Updating UI helpers to use"
+value=`cat component_config/uiOptions.json`
+echo "$value"
+if [ ! -z "$value" ]
+then
+    docker run --rm \
+            -e KBC_DEVELOPERPORTAL_USERNAME \
+            -e KBC_DEVELOPERPORTAL_PASSWORD \
+            quay.io/keboola/developer-portal-cli-v2:latest \
+            update-app-property ${KBC_DEVELOPERPORTAL_VENDOR} ${KBC_DEVELOPERPORTAL_APP} uiOptions --value="$value"
+else
+    echo "uiOptions is empty!"
+fi
