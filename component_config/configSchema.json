@@ -1,19 +1,16 @@
 {
   "type": "object",
-  "title": "extractor configuration",
+  "title": "Tempo Extractor Global Configuration",
   "required": [
-    "print_hello"
+    "#api_token"
   ],
   "properties": {
-    "print_hello": {
-      "type": "boolean",
-      "title": "Print Hello",
+    "#api_token": {
+      "type": "string",
+      "title": "Tempo API token",
+      "description": "API token you can get from <a href=\"https://revoltbi.atlassian.net/plugins/servlet/ac/io.tempo.jira/tempo-app#!/configuration/api-integration\">the appropriate Tempo configuration page</a>.",
+      "format": "password",
       "propertyOrder": 1
-    },
-    "debug": {
-      "type": "boolean",
-      "title": "Debug",
-      "propertyOrder": 2
     }
   }
 }
