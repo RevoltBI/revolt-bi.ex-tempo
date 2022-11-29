@@ -27,10 +27,7 @@ KEY_LOAD_TYPE = "load_type"
 # Sync options config dict params:
 KEY_DATE_FROM = "date_from"
 KEY_DATE_TO = "date_to"
-
-# Config dict constants:
-VAL_LAST_RUN = "last run"
-VAL_NONE = "none"
+KEY_ONLY_CHANGES_SINCE_LAST_RUN = "only_changes_since_last_run"
 
 # State keys:
 KEY_LAST_RUN_DATETIME = "last_run_downloaded_data_up_to_datetime"
@@ -55,6 +52,7 @@ REQUIRED_IMAGE_PARS = []
 
 # Other constants:
 SYNC_OPTIONS_NEEDED_ENDPOINTS = (Endpoint.WORKLOGS,)
+DEFAULT_DATE_FROM = "1 year ago"
 
 
 class TempoExtractor(ComponentBase):
@@ -94,12 +92,12 @@ class TempoExtractor(ComponentBase):
         Main execution code
         """
         if self.sync_options:
-            min_date_modified, max_date_modified = self.handle_sync_options(self.sync_options)
+            date_from, date_to, updated_from = self.handle_sync_options(self.sync_options)
         elif self.endpoint in SYNC_OPTIONS_NEEDED_ENDPOINTS:
             raise UserException("Sync Options must be defined.")
 
         if self.endpoint is Endpoint.WORKLOGS:
-            self.extract_worklogs(date_from=min_date_modified, date_to=max_date_modified)
+            self.extract_worklogs(date_from=date_from, date_to=date_to, updated_from=updated_from)
         else:
             raise Exception("Unexpected execution branch.")
 
@@ -107,31 +105,32 @@ class TempoExtractor(ComponentBase):
             self.write_state_file(self.tmp_state)
 
     def handle_sync_options(self, sync_options: dict):
-        last_run_datetime_str: Optional[str] = self.tmp_state.get(KEY_LAST_RUN_DATETIME, VAL_NONE)
+        last_run_datetime_str: Optional[str] = self.tmp_state.get(KEY_LAST_RUN_DATETIME)
         date_from_str: str = sync_options[KEY_DATE_FROM]
         date_to_str: str = sync_options[KEY_DATE_TO]
-        if date_from_str == VAL_LAST_RUN:
-            date_from_str = last_run_datetime_str
+        only_changes_since_last_run: bool = sync_options[KEY_ONLY_CHANGES_SINCE_LAST_RUN]
 
-        if date_from_str != VAL_NONE:
-            date_from = dateparser.parse(date_from_str)
-            if not date_from:
-                raise UserException("Date From parameter could not be parsed.")
-        else:
-            date_from = None
+        date_from = dateparser.parse(date_from_str)
+        if not date_from:
+            raise UserException("Date From parameter could not be parsed.")
 
-        if date_to_str != VAL_NONE:
-            date_to = dateparser.parse(date_to_str)
-            if not date_to:
-                raise UserException("Date To parameter could not be parsed.")
+        date_to = dateparser.parse(date_to_str)
+        if not date_to:
+            raise UserException("Date To parameter could not be parsed.")
+
+        logging.info(f"Date from parsed to: {date_from.isoformat(timespec='seconds')};"
+                     f" Date to parsed to: {date_to.isoformat(timespec='seconds')}")
+
+        if only_changes_since_last_run:
+            updated_from = dateparser.parse(last_run_datetime_str) if last_run_datetime_str else None
         else:
-            date_to = None
+            updated_from = None
 
         self.tmp_state[KEY_LAST_RUN_DATETIME] = datetime.now(tz=timezone.utc).isoformat(timespec="seconds")
-        return date_from, date_to
+        return date_from, date_to, updated_from
 
-    def extract_worklogs(self, date_from: datetime, date_to: datetime):
-        worklogs = self.client.get_worklogs(dateFrom=date_from, dateTo=date_to)
+    def extract_worklogs(self, date_from: datetime, date_to: datetime, updated_from: Optional[datetime] = None):
+        worklogs = self.client.get_worklogs(dateFrom=date_from, dateTo=date_to, updatedFrom=updated_from)
         if isinstance(worklogs, list):
             worklogs_table = create_table(records=worklogs, table_name="worklogs", primary_key=["tempoWorklogId"])
             worklogs_table.save_as_csv_with_manifest(self, incremental=self.incremental, include_csv_header=self.debug)

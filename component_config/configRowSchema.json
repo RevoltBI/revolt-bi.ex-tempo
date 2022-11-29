@@ -33,49 +33,58 @@
             "propertyOrder": 20,
             "required": [
                 "date_from",
-                "date_to"
+                "date_to",
+                "only_changes_since_last_run"
             ],
             "properties": {
                 "date_from": {
                     "type": "string",
                     "title": "Date From",
-                    "default": "last run",
-                    "description": "Date from which data is downloaded (i.e. only data last modified after this are downloaded). Either date in `YYYY-MM-DD` format or dateparser string i.e. `5 days ago`, `1 month ago`, `yesterday`, etc. You can also set this as `last run`, which will fetch data from the last run of the component; if no previous successful run exists, all data up to specified Date To will be downloaded.",
-                    "propertyOrder": 20
+                    "default": "1 year ago",
+                    "description": "Date from which data is downloaded (i.e. only data corresponding to datetime after this are downloaded). Either date in `YYYY-MM-DD` format or dateparser string i.e. `5 days ago`, `1 month ago`, `yesterday`, etc.",
+                    "propertyOrder": 10
                 },
                 "date_to": {
                     "type": "string",
                     "title": "Date to",
-                    "default": "now",
-                    "description": "Date to which data is downloaded (i.e. only data last modified before this are downloaded). Either date in `YYYY-MM-DD` format or dateparser string i.e. `5 days ago`, `1 week ago`, `today`, etc.",
-                    "propertyOrder": 30
-                }
-            }
-        },
-        "destination": {
-            "title": "Destination",
-            "type": "object",
-            "propertyOrder": 400,
-            "required": [
-                "load_type"
-            ],
-            "properties": {
-                "load_type": {
-                    "type": "string",
-                    "enum": [
-                        "full_load",
-                        "incremental_load"
-                    ],
-                    "options": {
-                        "enum_titles": [
-                            "Full Load",
-                            "Incremental Load"
-                        ]
-                    },
-                    "default": "incremental_load",
-                    "title": "Load Type",
-                    "description": "If Full load is used, the destination table will be overwritten every run. If Incremental load is used, data will be upserted into the destination table.",
+                    "default": "tomorrow",
+                    "description": "Date to which data is downloaded (i.e. only data corresponding to datetime before this are downloaded). Either date in `YYYY-MM-DD` format or dateparser string i.e. `5 days ago`, `1 week ago`, `today`, etc.",
                     "propertyOrder": 20
+                },
+                "only_changes_since_last_run": {
+                    "type": "boolean",
+                    "title": "Only changes since the last run",
+                    "default": true,
+                    "description": "Check if you only want to download changes (new records and updated records) since the last run of this component row.",
+                    "propertyOrder": 30,
+                    "format": "checkbox"
+                }
+            },
+            "destination": {
+                "title": "Destination",
+                "type": "object",
+                "propertyOrder": 400,
+                "required": [
+                    "load_type"
+                ],
+                "properties": {
+                    "load_type": {
+                        "type": "string",
+                        "enum": [
+                            "full_load",
+                            "incremental_load"
+                        ],
+                        "options": {
+                            "enum_titles": [
+                                "Full Load",
+                                "Incremental Load"
+                            ]
+                        },
+                        "default": "incremental_load",
+                        "title": "Load Type",
+                        "description": "If Full load is used, the destination table will be overwritten every run. If Incremental load is used, data will be upserted into the destination table.",
+                        "propertyOrder": 20
+                    }
                 }
             }
         }
