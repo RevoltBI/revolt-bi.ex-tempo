@@ -11,11 +11,13 @@
             "description": "Select the data you wish to download.",
             "type": "string",
             "enum": [
-                "worklogs"
+                "worklogs",
+                "plans"
             ],
             "options": {
                 "enum_titles": [
-                    "Worklogs"
+                    "Worklogs",
+                    "Plans"
                 ]
             },
             "propertyOrder": 10
@@ -24,7 +26,8 @@
             "options": {
                 "dependencies": {
                     "endpoint": [
-                        "worklogs"
+                        "worklogs",
+                        "plans"
                     ]
                 }
             },

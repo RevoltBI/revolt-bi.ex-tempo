@@ -43,6 +43,7 @@ class LoadType(Enum):
 @unique
 class Endpoint(Enum):
     WORKLOGS = "worklogs"
+    PLANS = "plans"
 
 
 # list of mandatory parameters => if some is missing,
@@ -98,6 +99,8 @@ class TempoExtractor(ComponentBase):
 
         if self.endpoint is Endpoint.WORKLOGS:
             self.extract_worklogs(date_from=date_from, date_to=date_to, updated_from=updated_from)
+        elif self.endpoint is Endpoint.PLANS:
+            self.extract_plans(date_from=date_from, date_to=date_to, updated_from=updated_from)
         else:
             raise Exception("Unexpected execution branch.")
 
@@ -136,6 +139,20 @@ class TempoExtractor(ComponentBase):
             worklogs_table.save_as_csv_with_manifest(self, incremental=self.incremental, include_csv_header=self.debug)
         else:
             raise UserException(f"API call returned unexpected response: {worklogs}")
+
+    def extract_plans(self, date_from: datetime, date_to: datetime, updated_from: Optional[datetime] = None):
+        api_response_ok: Optional[bool] = None
+        plans_resp_data = self.client.get_plans(dateFrom=date_from, dateTo=date_to, updatedFrom=updated_from)
+        if isinstance(plans_resp_data, dict):
+            plans = plans_resp_data.get('results')
+            if isinstance(plans, list):
+                worklogs_table = create_table(records=plans, table_name="plans", primary_key=["id"])
+                worklogs_table.save_as_csv_with_manifest(self,
+                                                         incremental=self.incremental,
+                                                         include_csv_header=self.debug)
+                api_response_ok = True
+        if not api_response_ok:
+            raise UserException(f"API call returned unexpected response: {plans_resp_data}")
 
 
 """
